@@ -1,5 +1,7 @@
 # Introduction to Apache Kafka
 
+![arsitektur kafka](../img/arsitektur-kafka.png)
+
 **Apache Kafka** adalah platform distributed event streaming yang **digunakan untuk membangun real-time data pipeline dan aplikasi streaming**. Kafka dirancang untuk menangani volume data yang besar secara skalabel dan tahan terhadap kegagalan (fault-tolerant), sehingga sangat cocok untuk use case seperti analitik real-time, ingest data, dan arsitektur berbasis event (event-driven architecture).
 
 Pada intinya, **Kafka merupakan sistem messaging publish-subscribe yang terdistribusi**. Data ditulis ke dalam topic Kafka oleh producer dan dikonsumsi dari topic tersebut oleh consumer. Topic Kafka dapat dipartisi sehingga memungkinkan pemrosesan data secara paralel, dan juga dapat direplikasi ke beberapa broker untuk menjamin keandalan sistem.
@@ -66,3 +68,36 @@ Sebuah topic memiliki karakteristik sebagai berikut:
 5. **Topic tidak dapat di-query secara langsung**, tetapi event di dalam topic dapat dibaca berulang kali sesuai kebutuhan. Berbeda dengan sistem messaging lainnya, event tidak dihapus setelah dikonsumsi. Sebagai gantinya, topic dapat dikonfigurasi agar data kedaluwarsa setelah mencapai usia tertentu atau ukuran tertentu.
 6. **Performa Kafka relatif konstan terhadap ukuran data**, sehingga menyimpan data dalam jangka waktu lama tidak berdampak signifikan terhadap performa.
 7. **Kafka juga menyediakan berbagai CLI tools untuk mengelola cluster**, broker, dan topic, serta Admin Client API yang memungkinkan kamu membangun tools administrasi sendiri.
+
+## Producer
+
+**Producer** adalah client yang menulis event ke Kafka. Producer menentukan topic tujuan penulisan data, dan producer juga **mengontrol bagaimana event didistribusikan ke partition di dalam sebuah topic**. Distribusi ini dapat dilakukan secara **round-robin** untuk pembagian beban (load balancing), atau berdasarkan fungsi partisi tertentu, misalnya menggunakan event key.
+
+Kafka menyediakan Java Producer API yang memungkinkan aplikasi mengirim aliran event (stream of events) ke dalam cluster Kafka.
+
+## Consumer
+
+Consumer adalah client yang membaca event dari Kafka.
+
+Satu-satunya metadata yang disimpan untuk setiap consumer adalah offset, yaitu posisi consumer di dalam sebuah topic. Offset ini dikontrol sepenuhnya oleh consumer itu sendiri. Biasanya, consumer akan memajukan offset secara berurutan (linear) saat membaca data, namun karena posisi ini dikontrol oleh consumer, maka consumer dapat membaca data dalam urutan apa pun. Misalnya, consumer dapat mengatur ulang offset ke posisi yang lebih lama untuk memproses ulang data di masa lalu, atau melompat ke offset terbaru untuk mulai mengonsumsi data dari kondisi “saat ini”.
+
+Kombinasi fitur ini membuat consumer Kafka bisa keluar dan masuk kapan saja tanpa memberikan dampak besar terhadap cluster Kafka maupun consumer lain yang sedang berjalan.
+
+## Partition
+
+Sebuah **topic** dibagi menjadi beberapa partition, yang berarti satu log topic dipecah menjadi beberapa log yang disimpan di **broker Kafka** yang berbeda-beda. Dengan cara ini, proses penyimpanan pesan, penulisan pesan baru, dan pemrosesan pesan yang sudah ada dapat dibagi ke banyak node dalam cluster. Penempatan data secara terdistribusi ini sangat penting untuk skalabilitas, karena memungkinkan aplikasi client membaca dan menulis data ke banyak broker secara bersamaan.
+
+Ketika sebuah event baru dipublikasikan ke dalam topic, event tersebut akan ditambahkan ke salah satu partition dari topic tersebut. Event yang memiliki event key yang sama (misalnya ID pelanggan atau ID kendaraan yang sama) akan ditulis ke partition yang sama. Kafka menjamin bahwa setiap consumer yang membaca sebuah partition akan selalu membaca event dalam urutan yang sama persis dengan urutan saat event tersebut ditulis.
+
+![cara kerja partisi](../img/cara-kerja-partisi.png)
+
+Contoh pada gambar menunjukkan sebuah topic dengan empat partition (P1–P4). Dua producer yang berbeda mengirimkan event ke topic tersebut secara independen dengan menulis event melalui jaringan ke partition-partition topic. Event dengan key yang sama (ditunjukkan dengan warna yang sama pada gambar) ditulis ke partition yang sama. Perlu dicatat bahwa kedua producer dapat menulis ke partition yang sama jika memang diperlukan.
+
+## Replikasi
+
+**Replikasi** merupakan bagian penting untuk menjaga data tetap tersedia (high availability) dan tahan terhadap kegagalan (fault tolerant). **Setiap topic dapat direplikasi**, bahkan lintas wilayah geografis atau antar data center. Hal ini berarti akan selalu ada beberapa broker yang menyimpan salinan data, sehingga jika terjadi masalah, kegagalan, atau saat dilakukan maintenance pada broker, data tetap aman dan dapat diakses.
+
+Pengaturan yang umum digunakan di lingkungan production adalah replication factor = 3, yang berarti selalu ada tiga salinan data yang tersimpan. **Proses replikasi ini dilakukan pada tingkat partition topic, bukan pada keseluruhan topic**.
+
+
+[dokumentasi resmi kafka](https://docs.confluent.io/kafka/introduction.html)

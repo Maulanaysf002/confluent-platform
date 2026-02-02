@@ -56,3 +56,5 @@ Untuk melengkapi Java API milik Kafka serta membantu menghubungkan semua sistem 
 6. **Schema Registry** menyediakan repositori terpusat untuk mengelola dan memvalidasi skema data pesan dalam topic, termasuk proses serialisasi dan deserialisasi data. Dalam sistem messaging seperti Kafka, layanan-layanan yang saling berinteraksi harus menggunakan format data yang sama (schema). **Schema Registry memungkinkan evolusi schema yang aman tanpa downtime, dengan pengaturan kompatibilitas yang dapat ditentukan pengguna. Schema Registry mendukung Avro®, JSON Schema, dan Protobuf, serta melacak seluruh versi schema**.
 
 7. **ksqlDB** adalah **mesin SQL streaming untuk Kafka yang memungkinkan pemrosesan data stream menggunakan SQL tanpa perlu menulis kode Java atau Python**. ksqlDB bersifat real-time, scalable, elastis, dan fault-tolerant, serta mendukung berbagai operasi seperti filtering, transformasi, agregasi, join, windowing, dan sessionization.
+
+[dokumentasi resmi cp platform](https://docs.confluent.io/platform/current/get-started/platform.html)
