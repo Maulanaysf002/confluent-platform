@@ -1,0 +1,1 @@
+secara default metrics pada c3 tidak langsung muncul dan harus di konfigurasi.
