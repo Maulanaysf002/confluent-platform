@@ -108,7 +108,7 @@ systemctl list-units | grep confluent
 
  journal ctl cek log
  `journalctl -u confluent-control-center -n 200 --no-pager`
-
+`journalctl -u confluent-control-center -f`
 
 ## Hasil Praktek
 

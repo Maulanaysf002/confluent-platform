@@ -60,6 +60,12 @@ echo "2" | sudo tee /var/lib/zookeeper2/myid
 echo "3" | sudo tee /var/lib/zookeeper3/myid
 ```
 
+```
+echo "1" | sudo tee /var/lib/tes/zookeeper1/myid
+echo "2" | sudo tee /var/lib/tes/zookeeper2/myid
+echo "3" | sudo tee /var/lib/tes/zookeeper3/myid
+```
+
 ### buat 3 file config zookeeper
 
 ```
@@ -107,7 +113,13 @@ EOF
 
 ### remove metadata broker lama
 
-`sudo rm -rf /var/lib/kafka*`
+```
+sudo rm -rf /var/lib/kafka/*
+
+sudo rm -rf /var/lib/tes/zookeeper1/*
+sudo rm -rf /var/lib/tes/zookeeper2/*
+sudo rm -rf /var/lib/tes/zookeeper3/*
+```
 
 ### buat folder metadata baru (broker kafka)
 
@@ -117,8 +129,8 @@ EOF
 ### buat folder metadata baru (ksqldb)
 
 `sudo mkdir -p /var/lib/kafka-streams`
-`sudo chown -R cp-kafka:confluent /var/lib/kafka-streams`
-`sudo chmod 755 /var/lib/kafka-streams`
+`sudo chown -R cp-server:confluent /var/lib/kafka-streams`
+`sudo chmod -R 777 /var/lib/kafka-streams`
 
 ### update kafka config (zookeeper.connect string)
 
@@ -169,6 +181,7 @@ sudo netstat -tlnp | grep -E "2181|2182|2183"
 ### jalankan service cp yang lain
 
 ```
+sudo systemctl start confluent-server
 sudo systemctl start confluent-schema-registry
 sudo systemctl start confluent-kafka-connect
 sudo systemctl start confluent-ksqldb
