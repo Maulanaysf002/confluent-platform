@@ -22,6 +22,11 @@ sudo ss -tlnp | grep -E "2181|2182|2183|2281|2282|2283"
 sudo kill <pid>
 ```
 
+## cek port 2888
+```bash
+ss -tulpn | grep 2888
+```
+
 ---
 
 # BROKER (confluent-server)
@@ -41,6 +46,20 @@ sudo kill <pid>
 ## masuk ke ksqldb
 ```bash
 ksql http://localhost:8088
+```
+---
+
+# KAFKA_CONNECT
+
+## cek journalctl
+```bash
+sudo journalctl -u confluent-kafka-connect -n 100 --no-pager
+sudo journalctl -u confluent-kafka-connect -f | grep -E "started|ready|listening|LEADER|ERROR"
+```
+
+## cek port 8083
+```bash
+sudo ss -tlnp | grep 8083
 ```
 
 ---
@@ -82,8 +101,57 @@ sudo systemctl stop confluent-zookeeper
 
 ---
 
+# ANSIBLE
 
+## testing koneksi
+```bash
+ansible -i inventory/hosts.yml all -m ping
+ansible -i inventory/hosts.yml all -m command -a "whoami" --become
+```
 
+## verifikasi variable
+```bash
+ansible -i inventory/hosts.yml confluent-4 -m debug \
+  -a "var=confluent_package_version,ssl_enabled,sasl_protocol" \
+  -e "@vars/platform.yml"
+```
+
+## deploy seluruh service
+```bash
+ansible-playbook -i inventory/hosts.yml confluent.yml
+
+# -v: task info
+# -vv: + variabel
+# -vvv: + SSH detail
+ansible-playbook -i inventory/hosts.yml confluent.yml -vv 2>&1 | tee ~/deployment.log
+```
+
+## deploy service satupersatu
+```bash
+# Hanya deploy ZooKeeper dan Kafka
+ansible-playbook -i inventory/hosts.yml confluent.yml \
+  --tags zookeeper,kafka_broker
+
+# Hanya deploy Schema Registry
+ansible-playbook -i inventory/hosts.yml confluent.yml \
+  --tags schema_registry
+
+# Hanya deploy kafka connect
+ansible-playbook -i inventory/hosts.yml confluent.yml \
+  --tags kafka_connect
+
+# Hanya deploy ksqldb
+ansible-playbook -i inventory/hosts.yml confluent.yml \
+  --tags ksql
+
+# Hanya deploy kafka connect
+ansible-playbook -i inventory/hosts.yml confluent.yml \
+  --tags kafka_rest
+
+# Hanya deploy Control Center
+ansible-playbook -i inventory/hosts.yml confluent.yml \
+  --tags control_center
+```
 
 
 
